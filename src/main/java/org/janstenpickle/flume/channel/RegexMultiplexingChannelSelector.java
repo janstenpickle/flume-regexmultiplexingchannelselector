@@ -5,6 +5,8 @@ import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.FlumeException;
 import org.apache.flume.channel.AbstractChannelSelector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -17,6 +19,9 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class RegexMultiplexingChannelSelector extends AbstractChannelSelector {
+
+    private static final Logger LOG = LoggerFactory
+            .getLogger(RegexMultiplexingChannelSelector.class);
 
     public static final String CONFIG_MULTIPLEX_HEADER_NAME = "header";
     public static final String DEFAULT_MULTIPLEX_HEADER =
@@ -64,23 +69,26 @@ public class RegexMultiplexingChannelSelector extends AbstractChannelSelector {
             }
         }
 
-        List<String> regexes = Arrays.asList(context.getString(CONFIG_PREFIX_REGEX).split(" "));
-
         regexChannelMapping = new HashMap<Pattern, List<Channel>>();
 
-        for (Iterator<String> regexIterator = regexes.iterator(); regexIterator.hasNext(); ) {
-            String regexName = regexIterator.next();
-            Map<String, String> regexMapConfig =
-                    context.getSubProperties(CONFIG_PREFIX_REGEX + "." + regexName + ".");
-            String regexValue = regexMapConfig.get("pattern");
-            Pattern regex = Pattern.compile(regexValue);
-            List<Channel> configuredChannels = getChannelListFromNames(regexMapConfig.get("channels"), channelNameMap);
-            if (configuredChannels.size() == 0) {
-                throw new FlumeException("No channel configured for when "
-                        + "regex value is: " + regexValue);
-            }
-            if (regexChannelMapping.put(regex, configuredChannels) != null) {
-                throw new FlumeException("Selector channel configured twice");
+        if (context.getString(CONFIG_PREFIX_REGEX) != null) {
+            List<String> regexes = Arrays.asList(context.getString(CONFIG_PREFIX_REGEX).split(" "));
+
+
+            for (Iterator<String> regexIterator = regexes.iterator(); regexIterator.hasNext(); ) {
+                String regexName = regexIterator.next();
+                Map<String, String> regexMapConfig =
+                        context.getSubProperties(CONFIG_PREFIX_REGEX + "." + regexName + ".");
+                String regexValue = regexMapConfig.get("pattern");
+                Pattern regex = Pattern.compile(regexValue);
+                List<Channel> configuredChannels = getChannelListFromNames(regexMapConfig.get("channels"), channelNameMap);
+                if (configuredChannels.size() == 0) {
+                    throw new FlumeException("No channel configured for when "
+                            + "regex value is: " + regexValue);
+                }
+                if (regexChannelMapping.put(regex, configuredChannels) != null) {
+                    throw new FlumeException("Selector channel configured twice");
+                }
             }
         }
 
