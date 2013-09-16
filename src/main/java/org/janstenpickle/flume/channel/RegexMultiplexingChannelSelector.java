@@ -100,14 +100,15 @@ public class RegexMultiplexingChannelSelector extends AbstractChannelSelector {
         String headerValue = event.getHeaders().get(headerName);
         List<Channel> channels = new ArrayList<Channel>();
 
+        //forwards all events to the default channels always
+        channels.addAll(defaultChannels);
+
+
         if ((headerValue != null || headerValue.trim().length() != 0) && headerChannelMapping.containsKey(headerValue)) {
 
             List<Channel> regexChannels = new ArrayList<Channel>();
             List<Channel> headerChannels = headerChannelMapping.get(headerValue);
 
-
-            //forwards all events to the default channels always
-            channels.addAll(defaultChannels);
 
             if (regexChannelMapping.size() > 0) {
                 for (Iterator<Pattern> regexChannelMappingIterator = regexChannelMapping.keySet().iterator();

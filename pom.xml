@@ -6,7 +6,7 @@
 
     <groupId>RegexMultiplexingChannelSelector</groupId>
     <artifactId>RegexMultiplexingChannelSelector</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <properties>
         <flume-version>1.4.0</flume-version>
